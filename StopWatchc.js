@@ -2,6 +2,8 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -25,12 +27,9 @@ var Stopwatch = function (_React$Component) {
       },
       results: []
     };
-    _this.calculate = _this.calculate.bind(_this);
     _this.start = _this.start.bind(_this);
     _this.stop = _this.stop.bind(_this);
     _this.reset = _this.reset.bind(_this);
-    _this.format = _this.format.bind(_this);
-    _this.pad0 = _this.pad0.bind(_this);
     _this.results = _this.results.bind(_this);
     _this.clear = _this.clear.bind(_this);
     return _this;
@@ -51,31 +50,21 @@ var Stopwatch = function (_React$Component) {
   }, {
     key: "calculate",
     value: function calculate() {
+      var minutes = this.state.time.minutes;
+      var seconds = this.state.time.seconds;
+      var miliseconds = this.state.time.miliseconds;
+      miliseconds++;
+      if (miliseconds >= 100) {
+        seconds++;
+        miliseconds = 0;
+      }
+      if (seconds >= 60) {
+        minutes++;
+        seconds = 0;
+      }
       this.setState({
-        time: {
-          minutes: this.state.time.minutes,
-          seconds: this.state.time.seconds,
-          miliseconds: this.state.time.miliseconds + 1
-        }
+        time: { minutes: minutes, seconds: seconds, miliseconds: miliseconds }
       });
-      if (this.state.time.miliseconds >= 100) {
-        this.setState({
-          time: {
-            minutes: this.state.time.minutes,
-            seconds: this.state.time.seconds + 1,
-            miliseconds: 0
-          }
-        });
-      }
-      if (this.state.time.seconds >= 60) {
-        this.setState({
-          time: {
-            miliseconds: this.state.time.miliseconds,
-            minutes: this.state.time.minutes + 1,
-            seconds: 0
-          }
-        });
-      }
     }
   }, {
     key: "stop",
@@ -116,13 +105,7 @@ var Stopwatch = function (_React$Component) {
   }, {
     key: "results",
     value: function results() {
-      var results = this.state.results;
-      results.push(React.createElement(
-        "li",
-        null,
-        this.format()
-      ));
-      this.setState({ results: results });
+      this.setState({ results: [].concat(_toConsumableArray(this.state.results), [this.format()]) });
     }
   }, {
     key: "render",
@@ -167,7 +150,13 @@ var Stopwatch = function (_React$Component) {
         React.createElement(
           "ul",
           null,
-          this.state.results
+          this.state.results.map(function (result) {
+            return React.createElement(
+              "li",
+              null,
+              result
+            );
+          })
         )
       );
     }

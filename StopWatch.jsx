@@ -10,12 +10,9 @@ class Stopwatch extends React.Component {
       },
       results: []
     };
-    this.calculate = this.calculate.bind(this);
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
     this.reset = this.reset.bind(this);
-    this.format = this.format.bind(this);
-    this.pad0 = this.pad0.bind(this);
     this.results = this.results.bind(this);
     this.clear = this.clear.bind(this);
   }
@@ -26,32 +23,23 @@ class Stopwatch extends React.Component {
     }
   }
   calculate() {
+    let minutes = this.state.time.minutes;
+    let seconds = this.state.time.seconds;
+    let miliseconds = this.state.time.miliseconds;
+    miliseconds++;
+    if (miliseconds >= 100) {
+      seconds++;
+      miliseconds = 0;
+    }
+    if (seconds >= 60) {
+      minutes++;
+      seconds = 0;
+    }
     this.setState({
-      time: {
-        minutes: this.state.time.minutes,
-        seconds: this.state.time.seconds,
-        miliseconds: this.state.time.miliseconds + 1
-      }
+      time: { minutes: minutes, seconds: seconds, miliseconds: miliseconds }
     });
-    if (this.state.time.miliseconds >= 100) {
-      this.setState({
-        time: {
-          minutes: this.state.time.minutes,
-          seconds: this.state.time.seconds + 1,
-          miliseconds: 0
-        }
-      });
-    }
-    if (this.state.time.seconds >= 60) {
-      this.setState({
-        time: {
-          miliseconds: this.state.time.miliseconds,
-          minutes: this.state.time.minutes + 1,
-          seconds: 0
-        }
-      });
-    }
   }
+
   stop() {
     this.setState({ running: false });
     clearInterval(this.watch);
@@ -81,9 +69,7 @@ class Stopwatch extends React.Component {
     this.setState({ results: [] });
   }
   results() {
-    let results = this.state.results;
-    results.push(<li>{this.format()}</li>);
-    this.setState({ results });
+    this.setState({ results: [...this.state.results, this.format()] });
   }
   render() {
     return (
@@ -106,7 +92,11 @@ class Stopwatch extends React.Component {
         <button className="button" onClick={this.results}>
           Results
         </button>
-        <ul>{this.state.results}</ul>
+        <ul>
+          {this.state.results.map(result => (
+            <li>{result}</li>
+          ))}
+        </ul>
       </div>
     );
   }
